@@ -19,8 +19,9 @@ public class Main {
             System.exit(-1);
         }
 
-        for (String arg : args)
-            process(new File(arg));
+        for (int i = 0; i < args.length; i++) {
+            process(new File(args[i]));
+        }
     }
 
     private static void process(File file) throws IOException {
@@ -36,9 +37,9 @@ public class Main {
     private static void processJarFile(File file) throws IOException {
         JarFile jar = new JarFile(file);
 
-        Enumeration<JarEntry> e = jar.entries();
+        Enumeration e = jar.entries();
         while (e.hasMoreElements()) {
-            JarEntry x =  e.nextElement();
+            JarEntry x =  (JarEntry)e.nextElement();
             if(!x.getName().endsWith(".class")) continue;
             InputStream is = jar.getInputStream(x);
             try {
@@ -64,7 +65,7 @@ public class Main {
         byte[] buf = new byte[8];
         dis.readFully(buf);
 
-        System.out.printf("%d.%d %s\n",u2(buf[6],buf[7]),u2(buf[4],buf[5]),name);
+        System.out.println(u2(buf[6],buf[7])+"."+u2(buf[4],buf[5])+" "+name);
     }
 
     private static int u2(byte u, byte d) {
