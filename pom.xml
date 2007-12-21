@@ -2,15 +2,15 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jvnet</groupId>
   <artifactId>animal-sniffer</artifactId>
-  <version>1.0</version>
+  <version>1.1-SNAPSHOT</version>
 
   <name>Checks the class file format version</name>
 
   
   <scm>
-    <connection>scm:svn:https://svn.dev.java.net/svn/animal-sniffer/tags/animal-sniffer-1.0</connection>
-    <developerConnection>scm:svn:https://svn.dev.java.net/svn/animal-sniffer/tags/animal-sniffer-1.0</developerConnection>
-    <url>https://animal-sniffer.dev.java.net/source/browse/animal-sniffer/tags/animal-sniffer-1.0</url>
+    <connection>scm:svn:https://svn.dev.java.net/svn/animal-sniffer/trunk/animal-sniffer</connection>
+    <developerConnection>scm:svn:https://svn.dev.java.net/svn/animal-sniffer/trunk/animal-sniffer</developerConnection>
+    <url>https://animal-sniffer.dev.java.net/source/browse/animal-sniffer/trunk/animal-sniffer/</url>
   </scm>
 
   <repositories>
