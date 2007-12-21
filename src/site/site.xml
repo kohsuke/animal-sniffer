@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<project name="Type arithmetic library for Java5">
+<project name="Animal Sniffer">
   <skin>
     <groupId>org.jvnet.maven-javanet-skin</groupId>
     <artifactId>maven-javanet-skin</artifactId>
