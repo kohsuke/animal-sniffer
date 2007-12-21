@@ -52,7 +52,7 @@ public class Main {
             if(!x.getName().endsWith(".class")) continue;
             InputStream is = jar.getInputStream(x);
             try {
-                process(file.getName()+':'+x.getName(),is);
+                process(file.getPath()+':'+x.getName(),is);
             } finally {
                 is.close();
             }
