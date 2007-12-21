@@ -25,6 +25,9 @@ public class Main {
     }
 
     private static void process(File file) throws IOException {
+        if(file.isDirectory())
+            processDirectory(file);
+        else
         if(file.getName().endsWith(".class"))
             processClassFile(file);
         else
@@ -32,6 +35,12 @@ public class Main {
             processJarFile(file);
 
         // ignore other files
+    }
+
+    private static void processDirectory(File dir) throws IOException {
+        File[] files = dir.listFiles();
+        for (int i = 0; i < files.length; i++)
+            process(files[i]);
     }
 
     private static void processJarFile(File file) throws IOException {
