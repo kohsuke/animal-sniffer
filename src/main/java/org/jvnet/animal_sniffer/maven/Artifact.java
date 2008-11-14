@@ -40,7 +40,7 @@ public class Artifact {
     }
 
     public org.apache.maven.artifact.Artifact createArtifact(ArtifactFactory factory) {
-		return factory.createArtifact(groupId, artifactId, version, null, "jar"/*don't really care*/);
+		return factory.createArtifact(groupId, artifactId, version, null, "sig"/*don't really care*/);
 	}
 
 	public String toString() {

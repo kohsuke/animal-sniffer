@@ -25,7 +25,6 @@ public class PackageListBuilder extends ClassFileVisitor {
     }
 
     protected void process(String name, InputStream image) throws IOException {
-        System.out.println(name);
         ClassReader cr = new ClassReader(image);
         cr.accept(new EmptyVisitor() {
             public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {

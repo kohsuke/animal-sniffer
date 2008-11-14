@@ -49,7 +49,6 @@ public class SignatureChecker extends ClassFileVisitor {
     }
 
     protected void process(String name, InputStream image) throws IOException {
-        System.out.println(name);
         ClassReader cr = new ClassReader(image);
 
         final Set warned = new HashSet();
@@ -61,6 +60,7 @@ public class SignatureChecker extends ClassFileVisitor {
 
             public void visitTypeInsn(int opcode, String type) {
                 if(shouldBeIgnored(type))   return;
+                if(type.startsWith("["))    return; // array
                 Clazz sigs = (Clazz) signatures.get(type);
                 if(sigs==null)
                     error("Undefined reference: "+type);
@@ -79,7 +79,10 @@ public class SignatureChecker extends ClassFileVisitor {
             }
 
             private boolean shouldBeIgnored(String type) {
-                String pkg = type.substring(0,type.lastIndexOf('/'));
+                if(type.startsWith("["))    return true; // array
+                int idx = type.lastIndexOf('/');
+                if(idx<0)   return ignoredPackages.contains("");
+                String pkg = type.substring(0, idx);
                 if(ignoredPackages.contains(pkg))
                     return true;
 
@@ -87,7 +90,7 @@ public class SignatureChecker extends ClassFileVisitor {
                 while(true) {
                     if(ignoredPackages.contains(pkg+"/*"))
                         return true;
-                    int idx=pkg.lastIndexOf('/');
+                    idx=pkg.lastIndexOf('/');
                     if(idx<0)   return false;
                     pkg = pkg.substring(0,idx);
                 }
