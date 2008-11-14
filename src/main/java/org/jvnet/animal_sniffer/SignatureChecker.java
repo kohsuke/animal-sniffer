@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -20,11 +21,21 @@ import java.util.zip.GZIPInputStream;
 public class SignatureChecker extends ClassFileVisitor {
     private final Map/*<String, Set<String>>*/ signatures = new HashMap();
 
+    /**
+     * Classes in this packages are considered to be resolved elsewhere and
+     * thus not a subject of the error checking when referenced.
+     */
+    private final Set ignoredPackages;
+
     public static void main(String[] args) throws Exception {
-        new SignatureChecker(new FileInputStream("signature")).process(new File("target/classes"));
+        Set ignoredPackages = new HashSet();
+        ignoredPackages.add("org/jvnet/animal_sniffer");
+        ignoredPackages.add("org/objectweb/*");
+        new SignatureChecker(new FileInputStream("signature"),ignoredPackages).process(new File("target/classes"));
     }
 
-    public SignatureChecker(InputStream in) throws IOException {
+    public SignatureChecker(InputStream in, Set ignoredPackages) throws IOException {
+        this.ignoredPackages = ignoredPackages;
         try {
             ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(in));
             while(true) {
@@ -41,12 +52,16 @@ public class SignatureChecker extends ClassFileVisitor {
     protected void process(String name, InputStream image) throws IOException {
         System.out.println(name);
         ClassReader cr = new ClassReader(image);
+
+        final Set warned = new HashSet();
+
         cr.accept(new EmptyVisitor() {
             public void visitMethodInsn(int opcode, String owner, String name, String desc) {
                 check(owner, name + desc);
             }
 
             public void visitTypeInsn(int opcode, String type) {
+                if(shouldBeIgnored(type))   return;
                 Set sigs = (Set) signatures.get(type);
                 if(sigs==null)
                     error("Undefined reference: "+type);
@@ -55,16 +70,33 @@ public class SignatureChecker extends ClassFileVisitor {
             public void visitFieldInsn(int opcode, String owner, String name, String desc) {
                 check(owner, name + '#' + desc);
             }
+
+            private void check(String owner, String sig) {
+                if(shouldBeIgnored(owner))   return;
+                Set sigs = (Set) signatures.get(owner);
+                if(sigs==null || !sigs.contains(sig))
+                    error("Undefined reference: "+owner+'.'+sig);
+            }
+
+            private boolean shouldBeIgnored(String type) {
+                String pkg = type.substring(0,type.lastIndexOf('/'));
+                if(ignoredPackages.contains(pkg))
+                    return true;
+
+                // check wildcard form
+                while(true) {
+                    if(ignoredPackages.contains(pkg+"/*"))
+                        return true;
+                    int idx=pkg.lastIndexOf('/');
+                    if(idx<0)   return false;
+                    pkg = pkg.substring(0,idx);
+                }
+            }
+
+            private void error(String msg) {
+                if(warned.add(msg))
+                    System.err.println(msg);
+            }
         }, 0);
-    }
-
-    private void check(String owner, String sig) {
-        Set sigs = (Set) signatures.get(owner);
-        if(sigs==null || !sigs.contains(sig))
-            error("Undefined reference: "+owner+'.'+sig);
-    }
-
-    private void error(String msg) {
-        System.err.println(msg);
     }
 }
