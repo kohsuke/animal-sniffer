@@ -54,7 +54,6 @@ public class BuildSignatureMojo extends AbstractMojo {
      * Signature module to use.
      *
      * @required
-     * @readonly
      * @parameter
      */
     protected Artifact signature;
