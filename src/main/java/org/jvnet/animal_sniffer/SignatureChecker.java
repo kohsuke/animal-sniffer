@@ -19,7 +19,7 @@ import java.util.zip.GZIPInputStream;
  * @author Kohsuke Kawaguchi
  */
 public class SignatureChecker extends ClassFileVisitor {
-    private final Map/*<String, Clazz>*/ signatures = new HashMap();
+    private final Map/*<String, Clazz>*/ classes = new HashMap();
 
     /**
      * Classes in this packages are considered to be resolved elsewhere and
@@ -41,7 +41,7 @@ public class SignatureChecker extends ClassFileVisitor {
             while(true) {
                 Clazz c = (Clazz) ois.readObject();
                 if(c==null)    return; // finished
-                signatures.put(c.name,c);
+                classes.put(c.name,c);
             }
         } catch (ClassNotFoundException e) {
             throw new NoClassDefFoundError(e.getMessage());
@@ -61,7 +61,7 @@ public class SignatureChecker extends ClassFileVisitor {
             public void visitTypeInsn(int opcode, String type) {
                 if(shouldBeIgnored(type))   return;
                 if(type.startsWith("["))    return; // array
-                Clazz sigs = (Clazz) signatures.get(type);
+                Clazz sigs = (Clazz) classes.get(type);
                 if(sigs==null)
                     error("Undefined reference: "+type);
             }
@@ -72,10 +72,22 @@ public class SignatureChecker extends ClassFileVisitor {
 
             private void check(String owner, String sig) {
                 if(shouldBeIgnored(owner))   return;
-                for( Clazz c = (Clazz) signatures.get(owner); c!=null; c=(Clazz)signatures.get(c.superClass) ) 
-                    if(c.signatures.contains(sig))
-                        return; // found it
+                if (find((Clazz) classes.get(owner), sig)) return; // found it
                 error("Undefined reference: "+owner+'.'+sig);
+            }
+
+            private boolean find(Clazz c, String sig) {
+                if(c==null)     return false;
+                if(c.signatures.contains(sig))  return true;
+
+                if(find((Clazz) classes.get(c.superClass),sig))   return true;
+
+                if(c.superInterfaces!=null)
+                    for (int i = 0; i < c.superInterfaces.length; i++)
+                        if(find((Clazz) classes.get(c.superInterfaces[i]),sig))
+                            return true;
+
+                return false;
             }
 
             private boolean shouldBeIgnored(String type) {

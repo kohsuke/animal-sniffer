@@ -49,7 +49,7 @@ public class SignatureBuilder extends ClassFileVisitor {
         Clazz clazz;
 
         public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-            this.clazz = new Clazz(name,new HashSet(),superName);
+            this.clazz = new Clazz(name,new HashSet(),superName, interfaces);
         }
 
         public void end() throws IOException {
