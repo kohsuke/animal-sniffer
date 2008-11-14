@@ -5,6 +5,7 @@
   <version>1.1-SNAPSHOT</version>
 
   <name>Checks the class file format version</name>
+  <packaging>maven-plugin</packaging>
 
   
   <scm>
@@ -41,8 +42,8 @@
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.4</source>
-          <target>1.4</target>
+          <source>1.3</source>
+          <target>1.3</target>
         </configuration>
       </plugin>
       <plugin>
@@ -74,6 +75,12 @@
           </archive>
         </configuration>
       </plugin>
+      <plugin>
+        <artifactId>maven-plugin-plugin</artifactId>
+        <configuration>
+          <goalPrefix>animal-sniffer</goalPrefix>
+        </configuration>
+      </plugin>
     </plugins>
     <extensions>
       <extension>
@@ -95,6 +102,26 @@
       <groupId>asm</groupId>
       <artifactId>asm-all</artifactId>
       <version>3.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-api</artifactId>
+      <version>2.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
+      <version>2.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-project</artifactId>
+      <version>2.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-artifact</artifactId>
+      <version>2.0.1</version>
     </dependency>
   </dependencies>
 

@@ -15,7 +15,7 @@ public abstract class ClassFileVisitor {
     /**
      * Multi-arg version of {@link #process(File)}.
      */
-    protected void process(File[] files) throws IOException {
+    public void process(File[] files) throws IOException {
         for (int i = 0; i < files.length; i++)
             process(files[i]);
     }
@@ -28,7 +28,7 @@ public abstract class ClassFileVisitor {
      *      or a class file (in which case that single class is processed),
      *      or a jar file (in which case all the classes in this jar file are processed.)
      */
-    protected void process(File file) throws IOException {
+    public void process(File file) throws IOException {
         if(file.isDirectory())
             processDirectory(file);
         else
