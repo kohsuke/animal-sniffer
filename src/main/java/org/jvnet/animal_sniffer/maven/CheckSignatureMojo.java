@@ -86,12 +86,14 @@ public class CheckSignatureMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             getLog().info("Checking unresolved references to "+signature);
-            
+            final boolean[] hadError = new boolean[1];
+
             org.apache.maven.artifact.Artifact a = signature.createArtifact(artifactFactory);
             resolver.resolve(a,project.getRemoteArtifactRepositories(), localRepository);
             // just check code from this module
             new SignatureChecker(new FileInputStream(a.getFile()),buildPackageList()) {
                 protected void reportError(String msg) {
+                    hadError[0] = true;
                     getLog().error(msg);
                 }
 
@@ -100,6 +102,9 @@ public class CheckSignatureMojo extends AbstractMojo {
                     super.process(name, image);
                 }
             }.process(outputDirectory);
+
+            if(hadError[0])
+                throw new MojoExecutionException("Signature errors found");
         } catch (IOException e) {
             throw new MojoExecutionException("Failed to check signatures",e);
         } catch (AbstractArtifactResolutionException e) {
