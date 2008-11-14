@@ -48,7 +48,7 @@ public class SignatureChecker extends ClassFileVisitor {
         }
     }
 
-    protected void process(String name, InputStream image) throws IOException {
+    protected void process(final String name, InputStream image) throws IOException {
         ClassReader cr = new ClassReader(image);
 
         final Set warned = new HashSet();
@@ -98,8 +98,12 @@ public class SignatureChecker extends ClassFileVisitor {
 
             private void error(String msg) {
                 if(warned.add(msg))
-                    System.err.println(msg);
+                    reportError(msg+" in "+name);
             }
         }, 0);
+    }
+
+    protected void reportError(String msg) {
+        System.err.println(msg);
     }
 }

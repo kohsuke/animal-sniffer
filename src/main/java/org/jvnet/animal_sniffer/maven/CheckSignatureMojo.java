@@ -21,16 +21,17 @@ import java.util.Set;
 import java.io.File;
 import java.io.IOException;
 import java.io.FileInputStream;
+import java.io.InputStream;
 
 /**
  * Checks the classes compiled by this module.
  *
  * @author Kohsuke Kawaguchi
- * @phase compile
+ * @phase process-classes
  * @requiresDependencyResolution compile
  * @goal check
  */
-public class BuildSignatureMojo extends AbstractMojo {
+public class CheckSignatureMojo extends AbstractMojo {
 
     /**
      * Project classpath.
@@ -84,10 +85,21 @@ public class BuildSignatureMojo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
+            getLog().info("Checking unresolved references to "+signature);
+            
             org.apache.maven.artifact.Artifact a = signature.createArtifact(artifactFactory);
             resolver.resolve(a,project.getRemoteArtifactRepositories(), localRepository);
+            // just check code from this module
+            new SignatureChecker(new FileInputStream(a.getFile()),buildPackageList()) {
+                protected void reportError(String msg) {
+                    getLog().error(msg);
+                }
 
-            apply(new SignatureChecker(new FileInputStream(a.getFile()),buildPackageList()));
+                protected void process(String name, InputStream image) throws IOException {
+                    getLog().debug(name);
+                    super.process(name, image);
+                }
+            }.process(outputDirectory);
         } catch (IOException e) {
             throw new MojoExecutionException("Failed to check signatures",e);
         } catch (AbstractArtifactResolutionException e) {
