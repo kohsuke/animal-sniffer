@@ -19,7 +19,7 @@ import java.util.zip.GZIPInputStream;
  * @author Kohsuke Kawaguchi
  */
 public class SignatureChecker extends ClassFileVisitor {
-    private final Map/*<String, Set<String>>*/ signatures = new HashMap();
+    private final Map/*<String, Clazz>*/ signatures = new HashMap();
 
     /**
      * Classes in this packages are considered to be resolved elsewhere and
@@ -39,10 +39,9 @@ public class SignatureChecker extends ClassFileVisitor {
         try {
             ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(in));
             while(true) {
-                String name = (String) ois.readObject();
-                if(name.equals("<EOF>"))    return; // finished
-                Set sigs = (Set) ois.readObject();
-                signatures.put(name,sigs);
+                Clazz c = (Clazz) ois.readObject();
+                if(c==null)    return; // finished
+                signatures.put(c.name,c);
             }
         } catch (ClassNotFoundException e) {
             throw new NoClassDefFoundError(e.getMessage());
@@ -62,7 +61,7 @@ public class SignatureChecker extends ClassFileVisitor {
 
             public void visitTypeInsn(int opcode, String type) {
                 if(shouldBeIgnored(type))   return;
-                Set sigs = (Set) signatures.get(type);
+                Clazz sigs = (Clazz) signatures.get(type);
                 if(sigs==null)
                     error("Undefined reference: "+type);
             }
@@ -73,9 +72,10 @@ public class SignatureChecker extends ClassFileVisitor {
 
             private void check(String owner, String sig) {
                 if(shouldBeIgnored(owner))   return;
-                Set sigs = (Set) signatures.get(owner);
-                if(sigs==null || !sigs.contains(sig))
-                    error("Undefined reference: "+owner+'.'+sig);
+                for( Clazz c = (Clazz) signatures.get(owner); c!=null; c=(Clazz)signatures.get(c.superClass) ) 
+                    if(c.signatures.contains(sig))
+                        return; // found it
+                error("Undefined reference: "+owner+'.'+sig);
             }
 
             private boolean shouldBeIgnored(String type) {

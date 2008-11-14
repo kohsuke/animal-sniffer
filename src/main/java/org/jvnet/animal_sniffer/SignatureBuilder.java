@@ -1,17 +1,16 @@
 package org.jvnet.animal_sniffer;
 
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.commons.EmptyVisitor;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.File;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.FileOutputStream;
-import java.util.Set;
 import java.util.HashSet;
 import java.util.zip.GZIPOutputStream;
 
@@ -34,7 +33,7 @@ public class SignatureBuilder extends ClassFileVisitor {
     }
 
     public void close() throws IOException {
-        oos.writeObject("<EOF>");   // EOF marker
+        oos.writeObject(null);   // EOF marker
         oos.close();
     }
 
@@ -47,26 +46,23 @@ public class SignatureBuilder extends ClassFileVisitor {
     }
 
     private class SignatureVisitor extends EmptyVisitor {
-        String className;
-        Set signatures;
+        Clazz clazz;
 
         public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-            this.className = name;
-            signatures = new HashSet();
+            this.clazz = new Clazz(name,new HashSet(),superName);
         }
 
         public void end() throws IOException {
-            oos.writeObject(className);
-            oos.writeObject(signatures);
+            oos.writeObject(clazz);
         }
 
         public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-            signatures.add(name+desc);
+            clazz.signatures.add(name+desc);
             return null;
         }
 
         public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
-            signatures.add(name+"#"+desc);
+            clazz.signatures.add(name+"#"+desc);
             return null;
         }
     }
