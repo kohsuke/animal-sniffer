@@ -1,6 +1,8 @@
 package org.jvnet.animal_sniffer;
 
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.commons.EmptyVisitor;
 
 import java.io.FileInputStream;
@@ -54,26 +56,66 @@ public class SignatureChecker extends ClassFileVisitor {
         final Set warned = new HashSet();
 
         cr.accept(new EmptyVisitor() {
-            public void visitMethodInsn(int opcode, String owner, String name, String desc) {
-                check(owner, name + desc);
-            }
+            public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+                return new EmptyVisitor() {
+                    /**
+                     * True if {@link SuppressWarnings}("jre-requirement") is set.
+                     */
+                    boolean ignoreError = false;
 
-            public void visitTypeInsn(int opcode, String type) {
-                if(shouldBeIgnored(type))   return;
-                if(type.startsWith("["))    return; // array
-                Clazz sigs = (Clazz) classes.get(type);
-                if(sigs==null)
-                    error("Undefined reference: "+type);
-            }
+                    public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+                        if(desc.equals("Ljava/lang/SuppressWarnings;"))
+                            return new EmptyVisitor() {
+                                public void visit(String name, Object value) {
+                                    String[] values = (String[])value;
+                                    for (int i = 0; i < values.length; i++)
+                                        ignoreError |= values[i].equalsIgnoreCase("jre-requirement");
+                                }
+                            };
+                        return super.visitAnnotation(desc, visible);
+                    }
 
-            public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-                check(owner, name + '#' + desc);
-            }
+                    public void visitMethodInsn(int opcode, String owner, String name, String desc) {
+                        check(owner, name + desc);
+                    }
 
-            private void check(String owner, String sig) {
-                if(shouldBeIgnored(owner))   return;
-                if (find((Clazz) classes.get(owner), sig)) return; // found it
-                error("Undefined reference: "+owner+'.'+sig);
+                    public void visitTypeInsn(int opcode, String type) {
+                        if(shouldBeIgnored(type))   return;
+                        if(type.startsWith("["))    return; // array
+                        Clazz sigs = (Clazz) classes.get(type);
+                        if(sigs==null)
+                            error("Undefined reference: "+type);
+                    }
+
+                    public void visitFieldInsn(int opcode, String owner, String name, String desc) {
+                        check(owner, name + '#' + desc);
+                    }
+
+                    private void check(String owner, String sig) {
+                        if(shouldBeIgnored(owner))   return;
+                        if (find((Clazz) classes.get(owner), sig)) return; // found it
+                        error("Undefined reference: "+owner+'.'+sig);
+                    }
+
+                    private boolean shouldBeIgnored(String type) {
+                        if(ignoreError)             return true;    // warning suppressed in this context
+                        if(type.startsWith("["))    return true; // array
+                        int idx = type.lastIndexOf('/');
+                        if(idx<0)   return ignoredPackages.contains("");
+                        String pkg = type.substring(0, idx);
+                        if(ignoredPackages.contains(pkg))
+                            return true;
+
+                        // check wildcard form
+                        while(true) {
+                            if(ignoredPackages.contains(pkg+"/*"))
+                                return true;
+                            idx=pkg.lastIndexOf('/');
+                            if(idx<0)   return false;
+                            pkg = pkg.substring(0,idx);
+                        }
+                    }
+                };
             }
 
             private boolean find(Clazz c, String sig) {
@@ -88,24 +130,6 @@ public class SignatureChecker extends ClassFileVisitor {
                             return true;
 
                 return false;
-            }
-
-            private boolean shouldBeIgnored(String type) {
-                if(type.startsWith("["))    return true; // array
-                int idx = type.lastIndexOf('/');
-                if(idx<0)   return ignoredPackages.contains("");
-                String pkg = type.substring(0, idx);
-                if(ignoredPackages.contains(pkg))
-                    return true;
-
-                // check wildcard form
-                while(true) {
-                    if(ignoredPackages.contains(pkg+"/*"))
-                        return true;
-                    idx=pkg.lastIndexOf('/');
-                    if(idx<0)   return false;
-                    pkg = pkg.substring(0,idx);
-                }
             }
 
             private void error(String msg) {
