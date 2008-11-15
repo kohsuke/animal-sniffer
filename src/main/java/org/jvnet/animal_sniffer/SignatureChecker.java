@@ -87,7 +87,8 @@ public class SignatureChecker extends ClassFileVisitor {
 
                     private void check(String owner, String sig) {
                         if(shouldBeIgnored(owner))   return;
-                        if (find((Clazz) classes.get(owner), sig)) return; // found it
+                        if (find((Clazz) classes.get(owner), sig))
+                            return; // found it
                         error("Undefined reference: "+owner+'.'+sig);
                     }
 
@@ -112,9 +113,16 @@ public class SignatureChecker extends ClassFileVisitor {
                 };
             }
 
+            /**
+             * If the given signature is found in the specified class, return true.
+             */
             private boolean find(Clazz c, String sig) {
                 if(c==null)     return false;
                 if(c.signatures.contains(sig))  return true;
+
+                if(sig.startsWith("<"))
+                    // constructor and static initializer shouldn't go up the inheritance hierarchy
+                    return false;
 
                 if(find((Clazz) classes.get(c.superClass),sig))   return true;
 
