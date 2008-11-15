@@ -1,19 +1,9 @@
+-----
+Animal Sniffer CLI
+-----
+
 What is this?
 
-    This project develops a set of tools to deal with problems common when
-    dealing with multiple versions of JDKs. Currently, the following tools
-    are available:
-    
-    * {{{cli.html}A command line tool to dump the class file version number}}.
-      This helps you track down the offending jar file when you see
-      <<<UnsupportedClassVersionError>>>.
-    
-    * {{{signature-checker.html}A maven plugin to verify that your code doesn't depend on new library
-      classes/methods/fields introduced in later versions of JREs}}.
-      This helps you ensure that your application runs on earlier versions of JREs
-      even when you use newer versions of JDKs for development.
-    
-    []
     This simple command line tool looks at Java class files and determine
     the format version number. The common use case of this tool is to figure
     out what is the offending jar file when you see <<<UnsupportedClassVersionError>>>.
