@@ -59,19 +59,13 @@ public class SignatureChecker extends ClassFileVisitor {
             public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
                 return new EmptyVisitor() {
                     /**
-                     * True if {@link SuppressWarnings}("jre-requirement") is set.
+                     * True if @IgnoreJRERequirement is set.
                      */
                     boolean ignoreError = false;
 
                     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-                        if(desc.equals("Ljava/lang/SuppressWarnings;"))
-                            return new EmptyVisitor() {
-                                public void visit(String name, Object value) {
-                                    String[] values = (String[])value;
-                                    for (int i = 0; i < values.length; i++)
-                                        ignoreError |= values[i].equalsIgnoreCase("jre-requirement");
-                                }
-                            };
+                        if(desc.equals("Lorg/jvnet/animal_sniffer/IgnoreJRERequirement;"))
+                            ignoreError = true;
                         return super.visitAnnotation(desc, visible);
                     }
 
