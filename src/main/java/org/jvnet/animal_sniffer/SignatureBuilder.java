@@ -20,6 +20,7 @@ import java.util.zip.GZIPOutputStream;
  * @author Kohsuke Kawaguchi
  */
 public class SignatureBuilder extends ClassFileVisitor {
+    private boolean foundSome;
     public static void main(String[] args) throws IOException {
         SignatureBuilder builder = new SignatureBuilder(new FileOutputStream("signature"));
         builder.process(new File(System.getProperty("java.home"),"lib/rt.jar"));
@@ -35,10 +36,12 @@ public class SignatureBuilder extends ClassFileVisitor {
     public void close() throws IOException {
         oos.writeObject(null);   // EOF marker
         oos.close();
+        if(!foundSome)  throw new IOException("No index is written");
     }
 
     protected void process(String name, InputStream image) throws IOException {
         System.out.println(name);
+        foundSome=true;
         ClassReader cr = new ClassReader(image);
         SignatureVisitor v = new SignatureVisitor();
         cr.accept(v,0);
