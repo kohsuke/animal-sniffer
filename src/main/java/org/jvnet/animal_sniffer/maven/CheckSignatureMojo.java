@@ -104,7 +104,7 @@ public class CheckSignatureMojo extends AbstractMojo {
             }.process(outputDirectory);
 
             if(hadError[0])
-                throw new MojoExecutionException("Signature errors found");
+                throw new MojoExecutionException("Signature errors found. Verify them and put @IgnoreJRERequirement on them.");
         } catch (IOException e) {
             throw new MojoExecutionException("Failed to check signatures",e);
         } catch (AbstractArtifactResolutionException e) {
