@@ -5,7 +5,7 @@
   <groupId>org.jvnet.animal-sniffer</groupId>
   <artifactId>java-signatures</artifactId>
   <packaging>pom</packaging>
-  <version>1.0</version>
+  <version>1.1</version>
   <name>Master POM for JDK signature modules</name>
     
   <distributionManagement>
@@ -41,7 +41,7 @@
             <dependency>
               <groupId>org.jvnet</groupId>
               <artifactId>animal-sniffer</artifactId>
-              <version>1.1</version>
+              <version>1.2-SNAPSHOT</version>
             </dependency>
           </dependencies>
         </plugin>
