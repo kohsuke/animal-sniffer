@@ -1,12 +1,11 @@
 package org.jvnet.animal_sniffer.ant;
 
-import org.apache.tools.ant.Task;
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.types.FileSet;
+import org.apache.tools.ant.Task;
 import org.jvnet.animal_sniffer.SignatureBuilder;
 
-import java.io.FileOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
@@ -15,10 +14,14 @@ import java.io.IOException;
 public class BuildSignatureTask extends Task {
 
     private File dest;
-    private FileSet src;
+    private File javaHome;
 
     public void setDest(File dest) {
         this.dest = dest;
+    }
+
+    public void setJavaHome(File javaHome) {
+        this.javaHome = javaHome;
     }
 
     public void execute() throws BuildException {
@@ -34,7 +37,9 @@ public class BuildSignatureTask extends Task {
     }
 
     private void process(SignatureBuilder builder, String name) throws IOException {
-        File f = new File(System.getProperty("java.home"), name);
+        if(javaHome==null)
+            javaHome = new File(System.getProperty("java.home"));
+        File f = new File(javaHome, name);
         if(f.exists())
             builder.process(f);
     }
