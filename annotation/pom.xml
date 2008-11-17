@@ -2,15 +2,15 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jvnet</groupId>
   <artifactId>animal-sniffer-annotation</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
 
   <name>Annotation for JDK requirements</name>
 
   
   <scm>
-    <connection>scm:svn:https://svn.dev.java.net/svn/animal-sniffer/trunk/animal-sniffer/annotation</connection>
-    <developerConnection>scm:svn:https://svn.dev.java.net/svn/animal-sniffer/trunk/animal-sniffer/annotation</developerConnection>
-    <url>https://animal-sniffer.dev.java.net/source/browse/animal-sniffer/trunk/animal-sniffer/annotation</url>
+    <connection>scm:svn:https://svn.dev.java.net/svn/animal-sniffer/tags/animal-sniffer-annotation-1.0</connection>
+    <developerConnection>scm:svn:https://svn.dev.java.net/svn/animal-sniffer/tags/animal-sniffer-annotation-1.0</developerConnection>
+    <url>https://animal-sniffer.dev.java.net/source/browse/animal-sniffer/tags/animal-sniffer-annotation-1.0</url>
   </scm>
 
   <repositories>
